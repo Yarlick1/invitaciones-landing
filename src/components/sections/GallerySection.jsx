@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { galleryItems } from '../../data/siteData'
-import { InvitationPreview } from '../ui/InvitationPreview'
 import { Card } from '../ui/Card'
 import { SectionShell } from '../ui/SectionShell'
 
@@ -9,17 +8,19 @@ export function GallerySection() {
 
   useEffect(() => {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let ctx
+    if (motionQuery.matches) return undefined
 
-    if (motionQuery.matches) {
-      return undefined
-    }
+    let ctx
+    let isCancelled = false
 
     async function animateGallery() {
       const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'),
         import('gsap/ScrollTrigger'),
       ])
+
+      // Si el componente se desmontó mientras cargaba GSAP, cancelamos la animación
+      if (isCancelled) return
 
       gsap.registerPlugin(ScrollTrigger)
 
@@ -33,15 +34,22 @@ export function GallerySection() {
           stagger: 0.1,
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 76%',
+            start: 'top 85%', // Punto de activación más cómodo
+            toggleActions: 'play none none none',
           },
         })
       }, sectionRef)
+
+      // Recalcula las posiciones en el DOM tras la carga asíncrona
+      ScrollTrigger.refresh()
     }
 
     animateGallery()
 
-    return () => ctx?.revert()
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (
@@ -60,7 +68,9 @@ export function GallerySection() {
               className="overflow-hidden bg-white p-0"
             >
               <div className="p-3">
-                <InvitationPreview type={item.previewType} eventType={item.eventType} />
+
+                <img src={item.src} alt="invitación" srcset="" />
+                {/* <InvitationPreview type={item.previewType} eventType={item.eventType} /> */}
               </div>
 
               <div className="border-t border-ink-900/10 px-5 pb-5 pt-4">

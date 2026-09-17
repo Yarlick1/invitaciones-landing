@@ -16,17 +16,22 @@ export function ProcessSection() {
 
   useEffect(() => {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let ctx
-
     if (motionQuery.matches) {
       return undefined
     }
+
+    let ctx
+    let isCancelled = false
+
 
     async function animateSteps() {
       const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'),
         import('gsap/ScrollTrigger'),
       ])
+
+      // Si el componente se desmontó mientras cargaba GSAP, cancelamos la animación
+      if (isCancelled) return
 
       gsap.registerPlugin(ScrollTrigger)
 
@@ -39,15 +44,21 @@ export function ProcessSection() {
           stagger: 0.11,
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 72%',
+            start: 'top 85%', // Punto de activación más cómodo
+            toggleActions: 'play none none none',
           },
         })
       }, sectionRef)
+      // Recalcula las posiciones en el DOM tras la carga asíncrona
+      ScrollTrigger.refresh()
     }
 
     animateSteps()
 
-    return () => ctx?.revert()
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (

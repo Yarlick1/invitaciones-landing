@@ -25,7 +25,7 @@ export function ClosingCTA() {
             href={siteInfo.whatsappUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-7 bg-white text-ink-900 hover:bg-brand-100 lg:mt-0"
+            className="mt-7 border border-white text-ink-900 hover:bg-brand-100 lg:mt-0"
             icon={false}
             size="lg"
           >
